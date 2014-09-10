@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>SKYEE Medical Fund Project</title>
+    <link href="css/todos.css" media="all" rel="stylesheet" type="text/css">
+    <script type="text/javascript" src="http://code.jquery.com/jquery-1.7.2.min.js"></script>
+    <script type="text/javascript" src="http://www.parsecdn.com/js/parse-1.2.16.min.js"></script>
+    <script type="text/javascript" src="lib/underscore.js"></script>
+    <script type="text/javascript" src="lib/pdfmake.js"></script>
+    <script type="text/javascript" src="lib/vfs_fonts.js"></script>
+    <script type="text/javascript" src="lib/fileSaver.js"></script>
+    <script type="text/javascript" src="lib/excellentexport.js"></script>
+
+    <script type="text/javascript" src="js/main.js"></script>
+    <script type="text/javascript" src="js/application_form.js"></script>
+    <script type="text/javascript" src="js/management.js"></script>
+
+    <script type="text/template" id="login-template">
+        <header id="header"></header>
+        <div class="login">
+            <form class="login-form">
+                <h2>Log In</h2>
+                <div class="error" style="display:none"></div>
+                <input type="text" id="login-username" placeholder="Username" />
+                <input type="password" id="login-password" placeholder="Password" />
+                <button>Log In</button>
+            </form>
+
+            <form class="signup-form">
+                <h2>Sign Up</h2>
+                <div class="error" style="display:none"></div>
+                <input type="text" id="signup-username" placeholder="Username" />
+                <input type="password" id="signup-password" placeholder="Create a Password" />
+                <button>Sign Up</button>
+            </form>
+        </div>
+    </script>
+
+    <script type="text/template" id="application-form-template">
+        <div id="user-info">
+            Signed in as <%= Parse.User.current().escape("username") %> (<a href="#" class="log-out">Log out</a>)
+        </div>
+        <form id="form_868794" class="appnitro"  method="post" action="">
+                <label class="description" for="element_5">1. Category(Please select ONLY ONE category from the following categories of support) </label>
+                <div>
+                    <input name="project_catagory" class="element radio" type="radio" value="1" />
+                    <label class="choice" for="element_1_1">Establishment of medical...</label>
+                    <input name="project_catagory" class="element radio" type="radio" value="2" />
+                    <label class="choice" for="element_1_2">Provision of medical education...</label>
+                    <input name="project_catagory" class="element radio" type="radio" value="3" />
+                    <label class="choice" for="element_1_3">Acquisiteion and/or construction...</label>
+                </div>
+                <label class="description" for="element_1">2. Project Title </label>
+                <div>
+                    <input id="project_title" size="100%" class="element text medium" type="text" maxlength="255" value="<%= project_title%>"/>
+                </div>
+                <label class="description" for="element_2">3. Project Participants  </label>
+               <div>
+                   <label class="description">Title </label>
+                   <select class="element select medium" id="project_leader_title">
+                       <option value="0" selected="selected"></option>
+                       <option value="1" >Prof</option>
+                       <option value="2" >Dr</option>
+                       <option value="3" >Mr</option>
+                       <option value="4" >Ms</option>
+                       <option value="5" >Mrs</option>
+                   </select>
+                   <label class="description" for="element_3">Surname:  </label>
+                   <input id="project_leader_surname" name="element_3" class="element text medium" type="text" maxlength="255" value="<%= project_leader_surname%>"/>
+                   <label class="description" for="element_4">Forename(s):  </label>
+                   <input id="project_leader_forename" name="element_4" class="element text medium" type="text" maxlength="255" value="<%= project_leader_forename%>"/>
+               </div>
+               <button id="saveFormButton" class="button_text" type="button" disabled="disabled">Submit</button>
+               <button id="printButton" class="button_text" type="button" disabled="disabled">Print</button>
+        </form>
+    </script>
+
+
+    <script type="text/template" id="management-form-template">
+        <div id ="top_panel">
+            <label class="description">Top Panel</label>
+        </div>
+        <div id ="left_panel">
+            <label class="description">Left Panel</label>
+        </div>
+        <div id="right_panel">
+            <label class="description">Right Panel</label>
+        </div>
+    </script>
+
+    <script type="text/template" id="project_item_template">
+        <label class="project_item"><%= admin_project_number%></label>
+        <label class="project_item"><%= project_title%></label>
+    </script>
+
+    <script type="text/template" id="manage_toolbar_template">
+        <!--<Button id="exportExcelButton">Export</Button>-->
+        <div>
+
+            <select class="element select medium" id="queryOption">
+                <option value="admin_project_number" selected="Project Number">Project Number</option>
+                <option value="project_leader_forename" >"Forename"</option>
+            </select>
+            <input type="text" id="queryText">
+            <button id="queryButton">Query</button>
+            <a id="exportExcelButton" download="somedata.xls" href="#">Export to Excel</a>
+        </div>
+
+
+        <table id="excelDataTable">
+        </table>
+    </script>
+
+
+    <script type="text/template" id="project_detail_template">
+        <div id="user-info">
+            Signed in as <%= Parse.User.current().escape("username") %> (<a href="#" class="log-out">Log out</a>)
+        </div>
+
+        <div>
+            <button id="saveManageButton" class="button_text" type="button">Save</button>
+        </div>
+        <form id="form_868794" class="appnitro"  method="post" action="">
+
+            <div>
+                <label class="description"  size="30%" for="element_1">Project Number: </label>
+                <input id="admin_project_number" size="70%" class="element text medium" type="text" maxlength="255" value="<%= admin_project_number%>"/>
+            </div>
+
+            <div>
+                <label class="description"  size="30%" for="element_1">Funded: </label>
+                <input type="checkbox" id="admin_project_funded" <% print( admin_project_funded ? 'checked="checked"' : '')%>>Project Funded<br>
+            </div>
+
+            <div>
+                <label class="description"  size="30%" for="element_1">Year 1 Amount: </label>
+                <input id="admin_project_y1_amount" size="70%" class="element text medium" type="text" maxlength="255" value="<%= admin_project_y1_amount%>"/>
+            </div>
+
+            <div>
+                <label class="description"  size="30%" for="element_1">Cheque No: </label>
+                <input id="admin_project_y1_check_no" size="70%" class="element text medium" type="text" maxlength="255" value="<%= admin_project_y1_check_no%>"/>
+            </div>
+            <hr width="100%">
+            <label class="description" for="element_5">1. Category(Please select ONLY ONE category from the following categories of support) </label>
+            <div>
+                <input name="project_catagory" class="element radio" type="radio" value="1" />
+                <label class="choice" for="element_1_1">Establishment of medical...</label>
+                <input name="project_catagory" class="element radio" type="radio" value="2" />
+                <label class="choice" for="element_1_2">Provision of medical education...</label>
+                <input name="project_catagory" class="element radio" type="radio" value="3" />
+                <label class="choice" for="element_1_3">Acquisiteion and/or construction...</label>
+            </div>
+            <label class="description" for="element_1">2. Project Title </label>
+            <div>
+                <input id="project_title" size="100%" class="element text medium" type="text" maxlength="255" value="<%= project_title%>"/>
+            </div>
+            <label class="description" for="element_2">3. Project Participants  </label>
+            <div>
+                <label class="description">Title </label>
+                <select class="element select medium" id="project_leader_title">
+                    <option value="0" selected="selected"></option>
+                    <option value="1" >Prof</option>
+                    <option value="2" >Dr</option>
+                    <option value="3" >Mr</option>
+                    <option value="4" >Ms</option>
+                    <option value="5" >Mrs</option>
+                </select>
+                <label class="description" for="element_3">Surname:  </label>
+                <input id="project_leader_surname" name="element_3" class="element text medium" type="text" maxlength="255" value="<%= project_leader_surname%>"/>
+                <label class="description" for="element_4">Forename(s):  </label>
+                <input id="project_leader_forename" name="element_4" class="element text medium" type="text" maxlength="255" value="<%= project_leader_forename%>"/>
+            </div>
+        </form>
+    </script>
+
+
+</head>
+<body>
+    <div id="todoapp">
+        <div class="title">
+            <h1>SKYEE Medical Fund Application</h1>
+        </div>
+        <div class="content">
+        </div>
+    </div>
+</body>
+</html>
